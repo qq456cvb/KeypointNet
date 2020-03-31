@@ -8,7 +8,7 @@ All annotated data in placed under **annotations/all.json**. In addition, we pro
 Currently, we have processed and cleaned labels for airplane (1022 models), chair (999 models) and table (1124 models).
 
 ## Data format
-```json
+```javascript
 [
     ...,
     {  
