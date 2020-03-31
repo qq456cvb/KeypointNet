@@ -1,0 +1,52 @@
+# path_info
+root_path: 
+data_path: 
+checkpoint_path: checkpoints/
+log_path: logs/
+
+# dataset info
+K: 20
+dataset: modelnet
+num_pairs: 20
+
+#model
+num_points: 2048
+num_cls: 3
+in_channels: 64
+out_channels: 40
+mid_channels: 1000
+
+#num_points: 5
+#in_channels: 3
+#out_channels: 3
+#mid_channels: 5
+
+drop_prob1: 0.1
+drop_prob2: 0.45
+
+first_cheb_order: 4
+second_cheb_order: 3
+
+# train
+mode: debug
+max_epoch: 100
+lr: 0.001
+weight_decay: 0.001
+lr_step: 5
+lr_decay: 0.5
+eval_step: 1
+save_step: 50
+batch_size: 4
+gpu: 0
+init_cheb_std: 0.05
+init_linear_std: 0.05
+task: cls
+topk: 1
+num_workers: 1
+task_type: reg
+
+# results
+name: demo
+checkpoint_name: model_best.pth.tar
+log_name: log.log
+
