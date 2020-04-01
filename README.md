@@ -3,6 +3,7 @@ KeypointNet is a large-scale and diverse 3D keypoint dataset that contains
 83,231 keypoints and 8,329 3D models from 16 object categories, by leveraging numerous human annotations, based on ShapeNet models. Our paper is available on https://arxiv.org/pdf/2002.12687.pdf and is accepted to CVPR 2020.
 
 # Keypoint Data
+Dataset can be downloaded [here](https://drive.google.com/open?id=1J1bBtPgIgeTa1ciDYB0ALoRGmGyY6qQ8 "https://drive.google.com/open?id=1J1bBtPgIgeTa1ciDYB0ALoRGmGyY6qQ8")
 All annotated data in placed under **annotations/all.json**. In addition, we provide sampled point clouds (2048 points) for each ShapeNet model under **pcds**.
 
 Currently, we have processed and cleaned labels for airplane (1022 models), chair (999 models) and table (1124 models).
@@ -73,3 +74,4 @@ If you use the KeypointNet data or code, please cite:
 ## TODOs
 
 - process more classes
+- add colored pcds/meshes
