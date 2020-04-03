@@ -9,9 +9,12 @@ Currently, we have processed and cleaned labels for airplane (1022 models), chai
 
 **UPDATE:** we have managed to add **color** information onto sampled point clouds and keypoints. In addition, since processing raw ShapeNet obj file as colored triangle meshes is painful, we have generated corresponding [ply file](https://drive.google.com/file/d/1YdyuwKVgDRw9p1u1gzGweCnuRoxGOZF3/view?usp=sharing) with vertex colors (diffuse texture color), for those are interested in dealing with triangle meshes. We believe color is an important source when learning from 3D geometries.
 
-![pcd](examples/captures/pcd.png){:height="360px" width="160px"}
+<img src="examples/captures/pcd.png" width="220" height="360" />
+<img src="examples/captures/obj.png" width="220" height="360" />
+<img src="examples/captures/ply.png" width="220" height="360" />
+<!-- ![pcd](examples/captures/pcd.png){:height="360px" width="160px"}
 ![obj](examples/captures/obj.png){:height="360px" width="160px"}
-![ply](examples/captures/ply.png){:height="360px" width="160px"}
+![ply](examples/captures/ply.png){:height="360px" width="160px"} -->
 
 ## Data format
 ```javascript
