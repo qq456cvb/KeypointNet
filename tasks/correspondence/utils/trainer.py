@@ -4,40 +4,32 @@ import time
 from tqdm import tqdm
 import torch
 import torch.nn as nn
+import numpy as np
 
+sys.path.append('..')
 from utils.tools import *
 
 class Trainer:
-    def __init__(self, cfg):
-        self.model = cfg['trainer_config']['model']
-        self.criterion = cfg['trainer_config']['criterion']
-        self.scheduler = cfg['trainer_config']['scheduler']
-        self.train_data = cfg['trainer_config']['train_data']
-        self.logger = cfg['logger']
-        self.writer = cfg['writer']
-        self.max_epoch = int(cfg["max_epoch"])
-        self.eval_step = int(cfg["eval_step"])
-        self.save_step = int(cfg["save_step"])
-        self.lr_step = int(cfg['lr_step'])
-        self.lr_decay = float(cfg["lr_decay"])
-        self.task = cfg['task_type']
+    def __init__(self, cfg, **kwargs):
+        self.max_epoch = cfg.max_epoch
+        self.eval_step = cfg.eval_step
+        self.save_step = cfg.save_step
+        self.lr_step = cfg.optimizer.lr_step
+        self.lr_decay = cfg.optimizer.lr_decay
         self.cfg = cfg
         self.loss = 0
         self.loss_dict = {'total': 0.}
-        self.metric_value = 0
-        self.best_score = 0
         self.iteration = 0
         self.epoch = 0
-        self.steps = 0
-        self.best_val_loss = sys.maxsize
         self.best_corr = -1
-        self.best_iou = -1
-        self.best_map = -1
-        self.img_save_dir = os.path.join(
-            cfg['root_path'], cfg['log_path'], cfg['name'], 'images')
-
-        if not os.path.exists(self.img_save_dir):
-            os.mkdir(self.img_save_dir)
+        
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+            
+        self.model = self.trainer_config['model']
+        self.criterion = self.trainer_config['criterion']
+        self.scheduler = self.trainer_config['scheduler']
+        self.train_data = self.trainer_config['train_data']
 
     def run(self):
         self.logger.info('-' * 20 + "New Training Starts" + '-' * 20)
@@ -71,11 +63,10 @@ class Trainer:
         cnt = 0
         self.model.train()
         for batch_data in tqdm(self.train_data):
-            self.steps += 1
             self.scheduler.zero_grad()
 
             logits = self.model(batch_data)
-            pcds, kp_index, _ = batch_data
+            pcds, kp_index = batch_data
             loss_dict = self.criterion((logits, kp_index))
             loss = loss_dict['total']
 
@@ -100,124 +91,47 @@ class Trainer:
 
     def evaluate(self):
         self.model.eval()
-        val_data = self.cfg['trainer_config']['val_data']
-        metric = self.cfg['trainer_config']['metric']
-        print("-------------------Evaluating model----------------------")
-        res = 0
+        val_data = self.trainer_config['val_data']
+        metric = self.trainer_config['metric']
+        self.logger.info("-------------------Evaluating model----------------------")
         cnt = 0
-        if self.task == 'pck':
-            results_list = []
-            for batch_data in tqdm(val_data):
-                with torch.no_grad():
-                    logits = self.model(batch_data)
-                pred_index = torch.argmax(logits, dim=1)
-                pcds, kp_index, _ = batch_data
-                input = (pcds.cuda(), kp_index.cuda(), pred_index)
-                corr_list = metric(input)
-                results_list.append(corr_list)
+        
+        results_list = []
+        for batch_data in tqdm(val_data):
+            with torch.no_grad():
+                logits = self.model(batch_data)
+            pred_index = torch.argmax(logits, dim=1)
+            pcds, kp_index = batch_data
+            input = (pcds.cuda(), kp_index.cuda(), pred_index)
+            corr_list = metric(input)
+            results_list.append(corr_list)
 
-                loss_dict = self.criterion((logits, kp_index))
-                for k, v in loss_dict.items():
-                    if k not in self.loss_dict:
-                        self.loss_dict[k] = v
-                    else:
-                        self.loss_dict[k] += v
-                cnt += 1
-
-            loss_avg = loss_dict['total'] / cnt
-            self.writer.add_scalar('val-loss', loss_avg, self.iteration)
-
-            results_list = np.mean(results_list, axis=0)
-            for i, corr in enumerate(results_list):
-                self.writer.add_scalar('correspondence/{:.2f}'.format(i*0.01), corr, self.iteration)
-                log_content = metric.__name__ + '_{:.2f}: {:.8f}'.format(i*0.01, corr)
-                self.logger.info(log_content)
-
-            is_best = False
-            # if loss_avg < self.best_val_loss:
-            #     self.best_val_loss = loss_avg
-            #     is_best = True
-            #     self.logger.info("Validation best epoch: {}".format(self.epoch))
-
-            if results_list[0] > self.best_corr:
-                self.best_corr = results_list[0]
-                is_best = True
-                self.logger.info("Validation best epoch: {}".format(self.epoch))
-
-            # if self.epoch % self.save_step == 0 or is_best:
-            if is_best:
-                save_checkpoint({
-                    'epoch': self.epoch,
-                    'state_dict': self.model.state_dict(),
-                    'best_val_loss': self.best_val_loss,
-                    'optimizer': self.scheduler.state_dict(), },
-                    is_best,
-                    os.path.join(self.cfg["root_path"], self.cfg["checkpoint_path"], self.cfg["name"],
-                                 'checkpoint_{}.pth.tar'.format(self.epoch)))
+            loss_dict = self.criterion((logits, kp_index))
             for k, v in loss_dict.items():
-                self.logger.info("Validation loss: {}: {}".format(k, v))
-            res = -1
+                if k not in self.loss_dict:
+                    self.loss_dict[k] = v
+                else:
+                    self.loss_dict[k] += v
+            cnt += 1
 
-        elif self.task == 'iou':
-            iou = 0.
-            map = 0.
-            for batch_data in tqdm(val_data):
-                with torch.no_grad():
-                    logits = self.model(batch_data)
-                pcds, kp_index, geo_dists = batch_data
-                input = (kp_index, logits, geo_dists)
-                iou_, map_ = metric(input)
-                iou += iou_
-                map += map_
-                cnt += 1
-            iou /= cnt
-            map /= cnt
-            self.logger.info("Validation IoU: {}".format(iou))
-            self.logger.info("Validation mAP: {}".format(map))
+        loss_avg = loss_dict['total'] / cnt
+        self.writer.add_scalar('val-loss', loss_avg, self.iteration)
 
-            is_best = False
-            if iou > self.best_iou:
-                is_best = True
-                self.best_iou = iou
+        results_list = np.mean(results_list, axis=0)
+        for i, corr in enumerate(results_list):
+            self.writer.add_scalar('correspondence/{:.2f}'.format(i*0.01), corr, self.iteration)
+            log_content = 'Validation pck' + '-{:.2f}: {:.8f}'.format(i*0.01, corr)
+            self.logger.info(log_content)
 
-            if self.epoch % self.save_step == 0 or is_best:
-                self.logger.info("Validation best IoU epoch: {}".format(self.epoch))
-                save_checkpoint({
-                    'epoch': self.epoch,
-                    'state_dict': self.model.state_dict(),
-                    'best_val_iou': self.best_iou,
-                    'optimizer': self.scheduler.state_dict(), },
-                    is_best,
-                    os.path.join(self.cfg["root_path"], self.cfg["checkpoint_path"], self.cfg["name"],
-                                 'iou_checkpoint_{}.pth.tar'.format(self.epoch)))
-            # if map > self.best_map:
-            #     self.best_map = map
-            #     self.logger.info("Validation best mAP epoch: {}".format(self.epoch))
-            #     save_checkpoint({
-            #         'epoch': self.epoch,
-            #         'state_dict': self.model.state_dict(),
-            #         'best_val_map': self.best_map,
-            #         'optimizer': self.scheduler.state_dict(), },
-            #         True,
-            #         os.path.join(self.cfg["root_path"], self.cfg["checkpoint_path"], self.cfg["name"],
-            #                      'map_checkpoint_{}.pth.tar'.format(self.epoch)))
-        else:
-            raise NotImplementedError
+        is_best = False
+        if results_list[0] > self.best_corr:
+            self.best_corr = results_list[0]
+            is_best = True
+            self.logger.info("Validation best epoch: {}".format(self.epoch))
 
-        # self.model.train()
-        # log_info = dict(
-        #     metric_name=metric.__name__,
-        #     value=res
-        # )
-        # return log_info
+        if is_best:
+            torch.save(self.model.state_dict(), 'pck_best.pth')
+            
+        for k, v in loss_dict.items():
+            self.logger.info("Validation loss: {}: {}".format(k, v))
 
-
-if __name__ == '__main__':
-    import logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s: %(message)s"
-    )
-    logger = logging.getLogger(__name__)
-    logger.addHandler(logging.FileHandler("test.log"))
-    logger.info("test")

@@ -6,6 +6,23 @@ import torch
 import shutil
 import numpy as np
 
+
+def naive_read_pcd(path):
+    lines = open(path, 'r').readlines()
+    idx = -1
+    for i, line in enumerate(lines):
+        if line.startswith('DATA ascii'):
+            idx = i + 1
+            break
+    lines = lines[idx:]
+    lines = [line.rstrip().split(' ') for line in lines]
+    data = np.asarray(lines)
+    pc = np.array(data[:, :3], dtype=np.float)
+    colors = np.array(data[:, -1], dtype=np.int)
+    colors = np.stack([(colors >> 16) & 255, (colors >> 8) & 255, colors & 255], -1)
+    return pc, colors
+
+
 def rotmat(a, b, c, hom_coord=False):  # apply to mesh using mesh.apply_transform(rotmat(a,b,c, True))
     """
     Create a rotation matrix with an optional fourth homogeneous coordinate
