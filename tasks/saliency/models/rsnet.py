@@ -104,8 +104,8 @@ class RSNet(nn.Module):
 
     def forward(self, x):
         hidden_list = self.init_hidden(x.size(0))
-        x = x.unsqueeze(-1).permute(0, 3, 1, 2)
-
+        x = x.unsqueeze(-1).permute(0, 3, 2, 1)
+        
         x_np = x.cpu().numpy()
         x_slice_idx = torch.from_numpy(gen_slice_idx(x_np, self.resolution[0], 0).astype('int32')).cuda()
         y_slice_idx = torch.from_numpy(gen_slice_idx(x_np, self.resolution[1], 1).astype('int32')).cuda()

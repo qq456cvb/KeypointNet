@@ -1,0 +1,19 @@
+log_path: 'saliency_log'
+
+class_name: 'chair'
+
+network: 'rsnet'
+rot_gravity: False
+data_aug: False
+
+iou_thresh: 0.1
+
+data:
+  annot_path: 'annotations/all.json'
+  model_root: 'models'
+  pcd_root: 'pcds'
+  test_txt: 'splits/test.txt'
+
+hydra:
+  run:
+    dir: ${log_path}/${network}/${class_name}

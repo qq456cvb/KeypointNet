@@ -14,7 +14,7 @@ def naive_read_pcd(path):
     lines = lines[idx:]
     lines = [line.rstrip().split(' ') for line in lines]
     data = np.asarray(lines)
-    pc = np.array(data[:, :3])
+    pc = np.array(data[:, :3], dtype=np.float)
     colors = np.array(data[:, -1], dtype=np.int)
     colors = np.stack([(colors >> 16) & 255, (colors >> 8) & 255, colors & 255], -1)
     return pc, colors

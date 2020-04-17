@@ -6,7 +6,7 @@ sys.path.append(os.path.join(BASE_DIR, "../utils"))
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-import RSCNN.pytorch_utils as pt_utils
+from . import pytorch_utils as pt_utils
 from .pointnet2_modules import PointnetSAModule, PointnetFPModule, PointnetSAModuleMSG
 import numpy as np
 

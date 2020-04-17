@@ -3,7 +3,7 @@ import os, sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import pytorch_utils as pt_utils
+from . import pytorch_utils as pt_utils
 
 import os, sys
 

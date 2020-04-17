@@ -1,2 +1,11 @@
 .vscode
-splits/gen_splits.py
+__pycache__
+/splits/gen_splits.py
+/annotations/*
+!/annotations/chair.json
+/models
+!/models/03001627/88382b877be91b2a572f8e1c1caad99e
+/pcds
+!/pcds/03001627/88382b877be91b2a572f8e1c1caad99e.pcd
+**/build
+/cache

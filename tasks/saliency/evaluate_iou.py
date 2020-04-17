@@ -18,16 +18,14 @@ def eval_det_cls(pred, gt, geo_dists, dist_thresh=0.1):
 
 
 def eval_iou(pred_all, gt_all, geo_dists, dist_thresh=0.05):
-    """ Generic functions to compute precision/recall for keypoint detection
+    """ Generic functions to compute iou for keypoint detection
         for multiple classes.
         Input:
             pred_all: map of {classname: {meshname: [kp]}}
             gt_all: map of {classname: {meshname: [kp]}}
             dist_thresh: scalar, iou threshold
         Output:
-            rec: {classname: rec}
-            prec: {classname: prec_all}
-            ap: {classname: scalar}
+            iou
     """
 
     iou = {}

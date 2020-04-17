@@ -2,16 +2,11 @@
 Directory "saliency" includes the code of benchmark "Keypoint Saliency Estimation", and 10 algorithms are benchmarked.
 ```
 saliency
-├── eval_iou_accuracy.py
-├── eval.py
 ├── evaluate_iou.py # IoU metric
-├── evaluate_keypoints.py
 ├── evaluate_map.py # mAP metric
-├── load_data.py
-├── models
+├── models # various backbones
 ├── test_kp_bin.py # test the models using IoU and mAP benchmarks
 ├── train_kp_bin.py # train the models with different backbones
-└── utils.py
 ```
 
 ## correspondence

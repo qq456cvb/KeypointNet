@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import RSCNN.pointnet2_utils as pointnet2_utils
-import RSCNN.pytorch_utils as pt_utils
+from . import pointnet2_utils as pointnet2_utils
+from . import pytorch_utils as pt_utils
 from typing import List
 import numpy as np
 import time
