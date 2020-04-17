@@ -2,6 +2,7 @@
 
 ## 2020-04-03
 - cleaned saliency experiments code
+- cleaned correspondence experiments code
 
 ## 2020-04-03
 

@@ -2,6 +2,9 @@
 KeypointNet is a large-scale and diverse 3D keypoint dataset that contains
 83,231 keypoints and 8,329 3D models from 16 object categories, by leveraging numerous human annotations, based on ShapeNet models. Our paper is available on https://arxiv.org/pdf/2002.12687.pdf and is accepted to CVPR 2020.
 
+# Change Logs
+For updated dataset information, see [Change Log](CHANGELOG.md)
+
 # Keypoint Data
 Dataset can be downloaded from [google drive](https://drive.google.com/open?id=1J1bBtPgIgeTa1ciDYB0ALoRGmGyY6qQ8 "https://drive.google.com/open?id=1J1bBtPgIgeTa1ciDYB0ALoRGmGyY6qQ8") or [baidu cloud](https://pan.baidu.com/s/1nGluwCnMG3BQRZ6J2TTI4A) (code: 785y). Annotated JSON data is placed under **annotations**. In addition, we provide sampled point clouds (2048 points) for each ShapeNet model under **pcds**.
 
@@ -64,17 +67,17 @@ Currently, we have processed and cleaned labels for airplane (1022 models), chai
 ]
 ```
 
-## Examples
+# Examples
 Example scripts on reading and visualizing keypoints on both point clouds and triangle meshes are placed under **examples**.
 
-## Keypoint Detection Tasks
+# Keypoint Detection Tasks
 Keypoint saliency and correspondence training and evaluation baselines for various backbones are placed under **tasks**. For more details, please refer to **tasks/README.md**.
 
-## Data Splits
+# Data Splits
 train/val/test splits are placed under **splits**. Each line is formatted as `[class_id]-[model_id]`.
 
 
-## Citation
+# Citation
 If you use the KeypointNet data or code, please cite:
 ```
 @article{you2020keypointnet,
@@ -85,7 +88,7 @@ If you use the KeypointNet data or code, please cite:
 }
 ```
 
-## TODOs
+# TODOs
 
 - [ ] clean labels for more classes
 - [x] add colored pcds/meshes
