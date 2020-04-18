@@ -32,7 +32,7 @@ if __name__ == "__main__":
     pcd.points = o3d.utility.Vector3dVector(pc)
     pcd.colors = o3d.utility.Vector3dVector(colors / 255.)
     
-    palette = sns.color_palette("bright", 20)  # create color palette
+    palette = sns.color_palette("bright", 25)  # create color palette
     
     # draw pcd and keypoints
     mesh_spheres = []
