@@ -17,8 +17,6 @@ class Trainer:
         self.lr_step = cfg.optimizer.lr_step
         self.lr_decay = cfg.optimizer.lr_decay
         self.cfg = cfg
-        self.loss = 0
-        self.loss_dict = {'total': 0.}
         self.iteration = 0
         self.epoch = 0
         self.best_corr = -1
@@ -40,20 +38,16 @@ class Trainer:
             tic = time.time()
             self.epoch += 1
             self.logger.info("Epoch {}/{}:".format(epoch, self.max_epoch))
-            self.step()
+            loss_avg = self.step()
             if self.epoch % self.eval_step == 0:
                 self.evaluate()
 
-            for k, v in self.loss_dict.items():
-                self.logger.info("training loss: {}: {}".format(k, v))
+            self.logger.info("Training loss: {}".format(loss_avg))
             toc = time.time()
             self.logger.info("Elapsed time is {}s".format(toc - tic))
 
     def step(self):
-        self.loss = 0
-        for k in self.loss_dict.keys():
-            self.loss_dict[k] = 0.
-
+        loss_avg = 0.
         self.iteration += 1
         for idx, group in enumerate(self.scheduler.param_groups):
             if self.iteration % self.lr_step == 0:
@@ -67,27 +61,17 @@ class Trainer:
 
             logits = self.model(batch_data)
             pcds, kp_index = batch_data
-            loss_dict = self.criterion((logits, kp_index))
-            loss = loss_dict['total']
-
-            for k, v in loss_dict.items():
-                if k not in self.loss_dict:
-                    self.loss_dict[k] = v
-                else:
-                    self.loss_dict[k] += v
+            loss = self.criterion((logits, kp_index))['total']
 
             loss.backward()
+            loss_avg += loss.item()
             nn.utils.clip_grad_norm_(self.model.parameters(), 1.)
             self.scheduler.step()
-            self.loss += loss.data
             cnt += 1
 
-        self.loss = self.loss / cnt
-        for k, v in self.loss_dict.items():
-            self.loss_dict[k] = self.loss_dict[k] / cnt
-
-        self.writer.add_scalar('training-loss', self.loss, self.iteration)
-
+        loss_avg = loss_avg / cnt
+        self.writer.add_scalar('training-loss', loss_avg, self.iteration)
+        return loss_avg
 
     def evaluate(self):
         self.model.eval()
@@ -96,6 +80,7 @@ class Trainer:
         self.logger.info("-------------------Evaluating model----------------------")
         cnt = 0
         
+        loss_avg = 0
         results_list = []
         for batch_data in tqdm(val_data):
             with torch.no_grad():
@@ -106,15 +91,11 @@ class Trainer:
             corr_list = metric(input)
             results_list.append(corr_list)
 
-            loss_dict = self.criterion((logits, kp_index))
-            for k, v in loss_dict.items():
-                if k not in self.loss_dict:
-                    self.loss_dict[k] = v
-                else:
-                    self.loss_dict[k] += v
+            loss = self.criterion((logits, kp_index))['total']
+            loss_avg += loss.item()
             cnt += 1
 
-        loss_avg = loss_dict['total'] / cnt
+        loss_avg = loss_avg / cnt
         self.writer.add_scalar('val-loss', loss_avg, self.iteration)
 
         results_list = np.mean(results_list, axis=0)
@@ -131,7 +112,6 @@ class Trainer:
 
         if is_best:
             torch.save(self.model.state_dict(), 'pck_best.pth')
-            
-        for k, v in loss_dict.items():
-            self.logger.info("Validation loss: {}: {}".format(k, v))
+
+        self.logger.info("Validation loss: {}".format(loss_avg))
 

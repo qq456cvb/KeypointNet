@@ -14,10 +14,24 @@ from .spidercnn import Spidercnn_seg_fullnet
 import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 from utils.tools import *
-from utils.losses import *
 import numpy as np
 # from model.RSCNN.rscnn import RSCNN_MSN
 
+
+class PCKLoss(nn.Module):
+    """
+    Calculate the cross entropy between pred logits and one hot kp labels.
+    """
+    def __init__(self):
+        super(PCKLoss, self).__init__()
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, pred, kps):
+        pred = self.softmax(pred)
+        loss = F.binary_cross_entropy(pred, kps)
+        pred_kp_idx = torch.argmax(pred, dim=1)
+        return loss, pred_kp_idx
+    
 
 class BenchMark(nn.Module):
     def __init__(self, cfg):
