@@ -9,7 +9,7 @@ For updated dataset information, see [Change Log](CHANGELOG.md)
 # Keypoint Data
 Dataset can be downloaded from [google drive](https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing "https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing") or [here](http://youyangsoft.com/public/KeypointNet/ShapeNetCore.v2.zip). Annotated JSON data is placed under **annotations**. In addition, we provide sampled point clouds (2048 points) for each ShapeNet model under **pcds**.
 
-Currently, we have processed and cleaned labels for airplane (1022 models), chair (999 models) and table (1124 models).
+We have processed and cleaned labels for airplane (1022 models), bathtub (492 models), bed (146 models), bottle (380 models), cap (38 models), car (1002 models), chair (999 models), guitar (697 models), helmet (90 models), knife (270 models), laptop (439 models), motorcycle (298 models), mug (198 models), skateboard (141 models), table (1124 models) and vessel (910 models).
 
 **UPDATE:** we have managed to add **color** information onto sampled point clouds and keypoints. In addition, since processing raw ShapeNet obj file as colored triangle meshes is painful, we have generated corresponding ply files (named **ShapeNetCore.v2.ply.zip**) with vertex colors (diffuse texture color), for those are interested in dealing with triangle meshes. We believe color is an important source when learning from 3D geometries.
 
