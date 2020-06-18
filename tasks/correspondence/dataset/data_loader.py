@@ -94,7 +94,7 @@ class KeypointDataset(torch.utils.data.Dataset):
             if model_id not in split_models:
                 continue
             
-            curr_keypoints = np.ones((self.nclasses,), dtype=np.int)
+            curr_keypoints = -np.ones((self.nclasses,), dtype=np.int)
             for kp in keypoints[model_id]:
                 curr_keypoints[kp[1]] = kp[0]
             self.keypoints.append(curr_keypoints)
