@@ -42,7 +42,7 @@ def main(cfg):
     gt_all[name] = {}
     log_dir = os.path.curdir
 
-    test_dataset = KeypointDataset(cfg, cfg.data.test_txt)
+    test_dataset = KeypointDataset(cfg, 'test')
     for i in range(len(test_dataset)):
         if test_dataset.mesh_names[i] not in pred_all_map[name]:
             pred_all_map[name][test_dataset.mesh_names[i]] = []
@@ -70,7 +70,13 @@ def main(cfg):
     else:
         logger.error('unrecognized network name')
         exit()
-        
+    
+    state_dict_tmp = torch.load('pck_best.pth')
+    print(state_dict_tmp.keys())
+    # state_dict = {}
+    # for k, v in state_dict_tmp.items():
+    #     state_dict[k.replace("backbone.","")] = v
+    # model.load_state_dict(state_dict)
     model.load_state_dict(torch.load('pck_best.pth'))
     model.eval()
 

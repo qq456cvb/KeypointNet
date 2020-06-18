@@ -80,7 +80,7 @@ class Trainer:
             nn.utils.clip_grad_norm_(self.model.parameters(), 1.)
             self.scheduler.step()
             self.loss += loss.data
-            cnt += 1
+            cnt += batch_data[0].shape[0]
 
         self.loss = self.loss / cnt
         for k, v in self.loss_dict.items():
@@ -91,6 +91,9 @@ class Trainer:
 
     def evaluate(self):
         self.model.eval()
+        for k in self.loss_dict.keys():
+            self.loss_dict[k] = 0.
+
         val_data = self.trainer_config['val_data']
         metric = self.trainer_config['metric']
         self.logger.info("-------------------Evaluating model----------------------")
@@ -112,9 +115,9 @@ class Trainer:
                     self.loss_dict[k] = v
                 else:
                     self.loss_dict[k] += v
-            cnt += 1
+            cnt += batch_data[0].shape[0]
 
-        loss_avg = loss_dict['total'] / cnt
+        loss_avg = self.loss_dict['total'] / cnt
         self.writer.add_scalar('val-loss', loss_avg, self.iteration)
 
         results_list = np.mean(results_list, axis=0)
@@ -132,6 +135,6 @@ class Trainer:
         if is_best:
             torch.save(self.model.state_dict(), 'pck_best.pth')
             
-        for k, v in loss_dict.items():
+        for k, v in self.loss_dict.items():
             self.logger.info("Validation loss: {}: {}".format(k, v))
 

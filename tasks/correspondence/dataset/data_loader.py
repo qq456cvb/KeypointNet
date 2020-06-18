@@ -37,6 +37,43 @@ BASEDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../..')
 class KeypointDataset(torch.utils.data.Dataset):
     def __init__(self, cfg, split):
         super().__init__()
+        # self.aug = cfg.data_aug
+        # self.catg = NAMES2ID[cfg.class_name]
+        # self.rot_train = cfg.rot_exp.rot_train
+        # self.rot_test = cfg.rot_exp.rot_test
+        # if split == 'train':
+        #     self.rot_exp = self.rot_train
+        # elif split == 'val' or split == 'test':
+        #     self.rot_exp = self.rot_test
+        
+        # filename = os.path.join(BASEDIR,
+        #     cfg.data.data_path, '{}.h5'.format(self.catg))
+        # with h5py.File(filename, 'r') as f:
+        #     self.pcds = f['point_clouds'][:]
+        #     self.keypoints = f['keypoints'][:]
+        #     self.mesh_names = f['mesh_names'][:]
+
+        # num_train = int(self.pcds.shape[0] * 0.7)
+        # num_divide = int(self.pcds.shape[0] * 0.85)
+
+        # if split == 'train':
+        #     self.pcds = self.pcds[:num_train]
+        #     self.keypoints = self.keypoints[:num_train]
+        #     self.mesh_names = self.mesh_names[:num_train]
+        # elif split == 'val':
+        #     self.pcds = self.pcds[num_train:num_divide]
+        #     self.keypoints = self.keypoints[num_train:num_divide]
+        #     self.mesh_names = self.mesh_names[num_train:num_divide]
+        # elif split == 'test':
+        #     self.pcds = self.pcds[num_divide:]
+        #     self.keypoints = self.keypoints[num_divide:]
+        #     self.mesh_names = self.mesh_names[num_divide:]
+        # elif split == 'all':
+        #     pass
+        # else:
+        #     raise ValueError("{}".format(split))
+        
+        self.nclasses = 2
         self.aug = cfg.data_aug
         self.rot_gravity = cfg.rot_gravity
             
@@ -64,7 +101,6 @@ class KeypointDataset(torch.utils.data.Dataset):
             self.pcds.append(naive_read_pcd(fn)[0])
             self.mesh_names.append(model_id)
 
-        
 
     def __getitem__(self, idx):
         pc = self.pcds[idx]

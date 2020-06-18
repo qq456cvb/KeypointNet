@@ -8,6 +8,7 @@ class PCKLoss(nn.Module):
     """
     def __init__(self):
         super(PCKLoss, self).__init__()
+        # TODO
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, pred, kps):

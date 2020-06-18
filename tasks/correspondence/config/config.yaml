@@ -1,7 +1,7 @@
 optimizer:
   lr: 0.001
   lr_decay: 0.5
-  lr_step: 5
+  lr_step: 500
   weight_decay: 0.001
 
 network: pointnet
@@ -9,12 +9,15 @@ gpu: 0
 batch_size: 8
 max_epoch: 100
 eval_step: 1
-num_workers: 6
+num_workers: 0
 class_name: chair
 log_path: correspondence_log
 num_points: 2048
 
 rot_gravity: False
+rot_exp:
+  rot_train: True
+  rot_test: True  # rotation experiment
 
 task: train
 data:

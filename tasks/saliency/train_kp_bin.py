@@ -14,6 +14,7 @@ import torch.nn.functional as F
 import json
 import io
 import logging
+import h5py
 logger = logging.getLogger(__name__)
 
 from models.rsnet import RSNet
@@ -23,7 +24,7 @@ from models.graphcnn import GraphConvNet
 from models.spidercnn import Spidercnn_seg_fullnet
 from models.pointconv import PointConvDensityClsSsg
 # from models.RSCNN.rscnn import RSCNN_MSN
-
+from scipy.stats import special_ortho_group
 
 ID2NAMES = {"02691156": "airplane",
             "02808440": "bathtub",
@@ -103,26 +104,24 @@ class KeypointDataset(torch.utils.data.Dataset):
     def __init__(self, cfg, split):
         super().__init__()
         self.aug = cfg.data_aug
-        self.rot_gravity = cfg.rot_gravity
-            
-        annots = json.load(open(os.path.join(BASEDIR, cfg.data.annot_path)))
-        annots = [annot for annot in annots if annot['class_id'] == NAMES2ID[cfg.class_name]]
-        keypoints = dict([(annot['model_id'], [kp_info['pcd_info']['point_index'] for kp_info in annot['keypoints']]) for annot in annots])
+        # self.rot_gravity = cfg.rot_gravity
+        self.catg = cfg.class_name
+        self.rot_train = cfg.rot_exp.rot_train
+        self.rot_test = cfg.rot_exp.rot_test
+        if split == 'train':
+            self.rot_exp = self.rot_train
+        elif split == 'val' or split == 'test':
+            self.rot_exp = self.rot_test
         
-        split_models = open(os.path.join(BASEDIR, split)).readlines()
-        split_models = [m.split('-')[-1].rstrip('\n') for m in split_models]
+        if split== 'val':
+            split = 'validate'
+        filename = os.path.join(BASEDIR,
+            cfg.data.data_path, '{}_{}.h5'.format(self.catg, split))
+        with h5py.File(filename, 'r') as f:
+            self.pcds = f['point_clouds'][:]
+            self.keypoints = f['keypoints'][:]
+            self.mesh_names = f['mesh_names'][:]
         
-        self.pcds = []
-        self.keypoints = []
-        self.mesh_names = []
-        for fn in glob(os.path.join(BASEDIR, cfg.data.pcd_root, NAMES2ID[cfg.class_name], '*.pcd')):
-            model_id = os.path.basename(fn).split('.')[0]
-            if model_id not in split_models:
-                continue
-            self.keypoints.append(keypoints[model_id])
-            self.pcds.append(naive_read_pcd(fn)[0])
-            self.mesh_names.append(model_id)
-
         self.nclasses = 2
 
     def __getitem__(self, idx):
@@ -139,10 +138,14 @@ class KeypointDataset(torch.utils.data.Dataset):
             pc += np.array([[tr, 0, 0]])
             pc = pc @ rot.T
 
+        if self.rot_exp:
+            rot = special_ortho_group.rvs(3)
+            pc = pc @ rot
+
         # allow rotation along gravity axis
-        if self.rot_gravity:
-            rot = rotmat(0, np.arccos(np.random.rand() * 2 - 1), 0, False)
-            pc = (rot @ pc.T).T
+        # if self.rot_gravity:
+        #     rot = rotmat(0, np.arccos(np.random.rand() * 2 - 1), 0, False)
+        #     pc = (rot @ pc.T).T
         return pc.astype(np.float32), bin_label
 
     def __len__(self):
@@ -155,10 +158,10 @@ def train(cfg):
 
     log_dir = os.path.curdir
 
-    train_dataset = KeypointDataset(cfg, cfg.data.train_txt)
+    train_dataset = KeypointDataset(cfg, 'train')
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=4)
 
-    val_dataset = KeypointDataset(cfg, cfg.data.val_txt)
+    val_dataset = KeypointDataset(cfg, 'val')
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=4, num_workers=4)
 
     # Load different models
@@ -237,6 +240,7 @@ def train(cfg):
                 val_loss['loss'] += loss.item()
 
         if val_loss['loss'] / len(val_dataloader) < best_loss:
+            logger.info("best epoch: {}".format(epoch))
             best_loss = val_loss['loss'] / len(val_dataloader)
             torch.save(model.state_dict(), os.path.join(log_dir, 'pck_best.pth'))
 
@@ -253,6 +257,7 @@ def train(cfg):
 
 @hydra.main(config_path='config/train.yaml')
 def main(cfg):
+    logger.info(cfg.pretty())
     train(cfg)
 
 
