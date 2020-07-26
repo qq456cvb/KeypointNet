@@ -16,21 +16,6 @@ sys.path.append("..") # Adds higher directory to python modules path.
 from utils.tools import *
 import numpy as np
 # from model.RSCNN.rscnn import RSCNN_MSN
-
-
-class PCKLoss(nn.Module):
-    """
-    Calculate the cross entropy between pred logits and one hot kp labels.
-    """
-    def __init__(self):
-        super(PCKLoss, self).__init__()
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, pred, kps):
-        pred = self.softmax(pred)
-        loss = F.binary_cross_entropy(pred, kps)
-        pred_kp_idx = torch.argmax(pred, dim=1)
-        return loss, pred_kp_idx
     
 
 class BenchMark(nn.Module):
@@ -71,8 +56,7 @@ class BenchMarkLoss(nn.Module):
     def forward(self, input_var):
         loss = {}
         pred, kps = input_var
-        kps_one_hot = convert_kp_to_one_hot(kps, pred.size(1))
-        loss_pck, pred_kps = self.pck_criterion(pred, kps_one_hot.cuda())
+        loss_pck = F.cross_entropy(pred, kps.cuda(), ignore_index=-1)
         loss["total"] = loss_pck
         return loss
 
