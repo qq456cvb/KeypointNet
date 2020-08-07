@@ -8,6 +8,7 @@ from .dgcnn import *
 from .spidercnn import Spidercnn_seg_fullnet as spidercnn
 from .graphcnn import *
 from .pointconv import *
+from .pointnet2.net import Pointnet2SSG
 # from model.SONet.segmenter import Model as sonet
 from .spidercnn import Spidercnn_seg_fullnet
 # from model.pointnet2.net import Pointnet2SSG
@@ -15,7 +16,9 @@ import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 from utils.tools import *
 import numpy as np
-# from model.RSCNN.rscnn import RSCNN_MSN
+from .RSCNN.rscnn import RSCNN_MSN
+from .rsnet import RSNet
+from .transformer import Transformer
 
 
 class PCKLoss(nn.Module):
@@ -49,12 +52,16 @@ class BenchMark(nn.Module):
             self.backbone = PointConvDensityClsSsg(self.num_kps)
         elif self.net == "graphcnn":
             self.backbone = GraphConvNet([3, 1024, 5, 1024, 5], [512, self.num_kps])
-            
+        elif self.net == 'pointnet2':
+            self.backbone = Pointnet2SSG(self.num_kps)
         elif self.net == "spidercnn":
             self.backbone = Spidercnn_seg_fullnet(self.num_kps)
         elif self.net == "rscnn":
-            from .RSCNN.rscnn import RSCNN_MSN
             self.backbone = RSCNN_MSN(self.num_kps)
+        elif self.net == 'rsnet':
+            self.backbone = RSNet(self.num_kps, rg=2.0)
+        elif self.net == 'transformer':
+            self.backbone = Transformer(self.num_kps, 512, num_head=8, num_encoder_layers=3, num_decoder_layers=3)
 
     def forward(self, input_):
         pcd = input_[0]
@@ -71,8 +78,12 @@ class BenchMarkLoss(nn.Module):
     def forward(self, input_var):
         loss = {}
         pred, kps = input_var
-        kps_one_hot = convert_kp_to_one_hot(kps, pred.size(1))
-        loss_pck, pred_kps = self.pck_criterion(pred, kps_one_hot.cuda())
+        # print(kps.shape, pred.shape)
+        loss_pck = F.cross_entropy(pred, kps.cuda(), ignore_index=-1)
+        # pred_kps = pred.argmax(dim=1)
+        # import pdb; pdb.set_trace()
+        # kps_one_hot = convert_kp_to_one_hot(kps, pred.size(1))
+        # loss_pck, pred_kps = self.pck_criterion(pred, kps_one_hot.cuda())
         loss["total"] = loss_pck
         return loss
 
@@ -83,11 +94,15 @@ class BenchMarkMetric(nn.Module):
         self.num_kps = cfg.num_kps
 
     def forward(self, input):
-        pts, gt_index, pred_index = input
+        if len(input) == 3:
+            pts, gt_index, pred_index = input
+            geo_dists = None
+        else:
+            pts, gt_index, pred_index, geo_dists = input
         pts = pts.cpu().numpy()
         gt_index = gt_index.cpu().numpy().astype(np.int32)
         pred_index = pred_index.cpu().numpy().astype(np.int32)
-        dist_info = pck(pts, gt_index, pred_index)
+        dist_info = pck(pts, gt_index, pred_index, geo_dists)
         corr_list = calculate_correspondence(dist_info, gt_index)
         return np.array(corr_list)
 
