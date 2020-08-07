@@ -16,6 +16,7 @@ import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 from utils.tools import *
 import numpy as np
+<<<<<<< HEAD
 from .RSCNN.rscnn import RSCNN_MSN
 from .rsnet import RSNet
 from .transformer import Transformer
@@ -34,6 +35,9 @@ class PCKLoss(nn.Module):
         loss = F.binary_cross_entropy(pred, kps)
         pred_kp_idx = torch.argmax(pred, dim=1)
         return loss, pred_kp_idx
+=======
+# from model.RSCNN.rscnn import RSCNN_MSN
+>>>>>>> 2d892fd3ee8138070c2be31df4ea66887eb90b24
     
 
 class BenchMark(nn.Module):
@@ -78,12 +82,16 @@ class BenchMarkLoss(nn.Module):
     def forward(self, input_var):
         loss = {}
         pred, kps = input_var
+<<<<<<< HEAD
         # print(kps.shape, pred.shape)
         loss_pck = F.cross_entropy(pred, kps.cuda(), ignore_index=-1)
         # pred_kps = pred.argmax(dim=1)
         # import pdb; pdb.set_trace()
         # kps_one_hot = convert_kp_to_one_hot(kps, pred.size(1))
         # loss_pck, pred_kps = self.pck_criterion(pred, kps_one_hot.cuda())
+=======
+        loss_pck = F.cross_entropy(pred, kps.cuda(), ignore_index=-1)
+>>>>>>> 2d892fd3ee8138070c2be31df4ea66887eb90b24
         loss["total"] = loss_pck
         return loss
 
