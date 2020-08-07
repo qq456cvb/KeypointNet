@@ -2,13 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from . import pointnet2_utils as pointnet2_utils
-from . import pytorch_utils as pt_utils
+import pointnet2_utils
+import pytorch_utils as pt_utils
 from typing import List
 import numpy as np
 import time
 import math
-
 
 class _PointnetSAModuleBase(nn.Module):
 
@@ -27,6 +26,7 @@ class _PointnetSAModuleBase(nn.Module):
             (B, N, 3) tensor of the xyz coordinates of the points
         features : torch.Tensor
             (B, N, C) tensor of the descriptors of the the points
+
         Returns
         -------
         new_xyz : torch.Tensor
@@ -44,21 +44,21 @@ class _PointnetSAModuleBase(nn.Module):
         else:
             new_xyz = None
             fps_idx = None
-
+        
         for i in range(len(self.groupers)):
-            new_features = self.groupers[i](xyz, new_xyz, features, fps_idx) if self.npoint is not None else \
-            self.groupers[i](xyz, new_xyz, features)  # (B, C, npoint, nsample)
+            new_features = self.groupers[i](xyz, new_xyz, features, fps_idx) if self.npoint is not None else self.groupers[i](xyz, new_xyz, features)  # (B, C, npoint, nsample)
             new_features = self.mlps[i](
                 new_features
             )  # (B, mlp[-1], npoint)
 
             new_features_list.append(new_features)
-
+        
         return new_xyz, torch.cat(new_features_list, dim=1)
 
 
 class PointnetSAModuleMSG(_PointnetSAModuleBase):
     r"""Pointnet set abstrction layer with multiscale grouping
+
     Parameters
     ----------
     npoint : int
@@ -81,61 +81,61 @@ class PointnetSAModuleMSG(_PointnetSAModuleBase):
             nsamples: List[int],
             mlps: List[List[int]],
             use_xyz: bool = True,
-            bias=True,
-            init=nn.init.kaiming_normal,
-            first_layer=False,
-            relation_prior=1
+            bias = True,
+            init = nn.init.kaiming_normal,
+            first_layer = False,
+            relation_prior = 1
     ):
         super().__init__()
         assert len(radii) == len(nsamples) == len(mlps)
         self.npoint = npoint
         self.groupers = nn.ModuleList()
         self.mlps = nn.ModuleList()
-
+        
         # initialize shared mapping functions
         C_in = (mlps[0][0] + 3) if use_xyz else mlps[0][0]
         C_out = mlps[0][1]
-
+        
         if relation_prior == 0:
             in_channels = 1
         elif relation_prior == 1 or relation_prior == 2:
             in_channels = 10
         else:
             assert False, "relation_prior can only be 0, 1, 2."
-
+        
         if first_layer:
-            mapping_func1 = nn.Conv2d(in_channels=in_channels, out_channels=math.floor(C_out / 2), kernel_size=(1, 1),
-                                      stride=(1, 1), bias=bias)
-            mapping_func2 = nn.Conv2d(in_channels=math.floor(C_out / 2), out_channels=16, kernel_size=(1, 1),
-                                      stride=(1, 1), bias=bias)
-            xyz_raising = nn.Conv2d(in_channels=C_in, out_channels=16, kernel_size=(1, 1),
-                                    stride=(1, 1), bias=bias)
+            mapping_func1 = nn.Conv2d(in_channels = in_channels, out_channels = math.floor(C_out / 2), kernel_size = (1, 1), 
+                                      stride = (1, 1), bias = bias)
+            mapping_func2 = nn.Conv2d(in_channels = math.floor(C_out / 2), out_channels = 16, kernel_size = (1, 1), 
+                                  stride = (1, 1), bias = bias)
+            xyz_raising = nn.Conv2d(in_channels = C_in, out_channels = 16, kernel_size = (1, 1), 
+                                  stride = (1, 1), bias = bias)
             init(xyz_raising.weight)
             if bias:
                 nn.init.constant(xyz_raising.bias, 0)
         elif npoint is not None:
-            mapping_func1 = nn.Conv2d(in_channels=in_channels, out_channels=math.floor(C_out / 4), kernel_size=(1, 1),
-                                      stride=(1, 1), bias=bias)
-            mapping_func2 = nn.Conv2d(in_channels=math.floor(C_out / 4), out_channels=C_in, kernel_size=(1, 1),
-                                      stride=(1, 1), bias=bias)
+            mapping_func1 = nn.Conv2d(in_channels = in_channels, out_channels = math.floor(C_out / 4), kernel_size = (1, 1), 
+                                      stride = (1, 1), bias = bias)
+            mapping_func2 = nn.Conv2d(in_channels = math.floor(C_out / 4), out_channels = C_in, kernel_size = (1, 1), 
+                                  stride = (1, 1), bias = bias)
         if npoint is not None:
             init(mapping_func1.weight)
             init(mapping_func2.weight)
             if bias:
                 nn.init.constant(mapping_func1.bias, 0)
-                nn.init.constant(mapping_func2.bias, 0)
-
-                # channel raising mapping
-            cr_mapping = nn.Conv1d(in_channels=C_in if not first_layer else 16, out_channels=C_out, kernel_size=1,
-                                   stride=1, bias=bias)
+                nn.init.constant(mapping_func2.bias, 0)    
+                     
+            # channel raising mapping
+            cr_mapping = nn.Conv1d(in_channels = C_in if not first_layer else 16, out_channels = C_out, kernel_size = 1, 
+                                      stride = 1, bias = bias)
             init(cr_mapping.weight)
             nn.init.constant(cr_mapping.bias, 0)
-
+        
         if first_layer:
             mapping = [mapping_func1, mapping_func2, cr_mapping, xyz_raising]
         elif npoint is not None:
             mapping = [mapping_func1, mapping_func2, cr_mapping]
-
+        
         for i in range(len(radii)):
             radius = radii[i]
             nsample = nsamples[i]
@@ -147,14 +147,14 @@ class PointnetSAModuleMSG(_PointnetSAModuleBase):
             if use_xyz:
                 mlp_spec[0] += 3
             if npoint is not None:
-                self.mlps.append(pt_utils.SharedRSConv(mlp_spec, mapping=mapping, relation_prior=relation_prior,
-                                                       first_layer=first_layer))
-            else:  # global convolutional pooling
-                self.mlps.append(pt_utils.GloAvgConv(C_in=C_in, C_out=C_out))
+                self.mlps.append(pt_utils.SharedRSConv(mlp_spec, mapping = mapping, relation_prior = relation_prior, first_layer = first_layer))
+            else:   # global convolutional pooling
+                self.mlps.append(pt_utils.GloAvgConv(C_in = C_in, C_out = C_out))
 
 
 class PointnetSAModule(PointnetSAModuleMSG):
     r"""Pointnet set abstrction layer
+
     Parameters
     ----------
     npoint : int
@@ -189,6 +189,7 @@ class PointnetSAModule(PointnetSAModuleMSG):
 
 class PointnetFPModule(nn.Module):
     r"""Propigates the features of one set to another
+
     Parameters
     ----------
     mlp : list
@@ -216,6 +217,7 @@ class PointnetFPModule(nn.Module):
             (B, C1, n) tensor of the features to be propigated to
         known_feats : torch.Tensor
             (B, C2, m) tensor of features to be propigated
+
         Returns
         -------
         new_features : torch.Tensor
@@ -232,10 +234,10 @@ class PointnetFPModule(nn.Module):
         )
         if unknow_feats is not None:
             new_features = torch.cat([interpolated_feats, unknow_feats],
-                                     dim=1)  # (B, C2 + C1, n)
+                                     dim=1)  #(B, C2 + C1, n)
         else:
             new_features = interpolated_feats
-
+        
         new_features = new_features.unsqueeze(-1)
         new_features = self.mlp(new_features)
 
@@ -244,7 +246,6 @@ class PointnetFPModule(nn.Module):
 
 if __name__ == "__main__":
     from torch.autograd import Variable
-
     torch.manual_seed(1)
     torch.cuda.manual_seed_all(1)
     xyz = Variable(torch.randn(2, 9, 3).cuda(), requires_grad=True)

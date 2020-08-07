@@ -16,28 +16,8 @@ import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 from utils.tools import *
 import numpy as np
-<<<<<<< HEAD
 from .RSCNN.rscnn import RSCNN_MSN
 from .rsnet import RSNet
-from .transformer import Transformer
-
-
-class PCKLoss(nn.Module):
-    """
-    Calculate the cross entropy between pred logits and one hot kp labels.
-    """
-    def __init__(self):
-        super(PCKLoss, self).__init__()
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, pred, kps):
-        pred = self.softmax(pred)
-        loss = F.binary_cross_entropy(pred, kps)
-        pred_kp_idx = torch.argmax(pred, dim=1)
-        return loss, pred_kp_idx
-=======
-# from model.RSCNN.rscnn import RSCNN_MSN
->>>>>>> 2d892fd3ee8138070c2be31df4ea66887eb90b24
     
 
 class BenchMark(nn.Module):
@@ -64,8 +44,6 @@ class BenchMark(nn.Module):
             self.backbone = RSCNN_MSN(self.num_kps)
         elif self.net == 'rsnet':
             self.backbone = RSNet(self.num_kps, rg=2.0)
-        elif self.net == 'transformer':
-            self.backbone = Transformer(self.num_kps, 512, num_head=8, num_encoder_layers=3, num_decoder_layers=3)
 
     def forward(self, input_):
         pcd = input_[0]
@@ -76,22 +54,12 @@ class BenchMark(nn.Module):
 class BenchMarkLoss(nn.Module):
     def __init__(self, cfg):
         super(BenchMarkLoss, self).__init__()
-        self.pck_criterion = PCKLoss()
         self.cfg = cfg
 
     def forward(self, input_var):
         loss = {}
         pred, kps = input_var
-<<<<<<< HEAD
-        # print(kps.shape, pred.shape)
         loss_pck = F.cross_entropy(pred, kps.cuda(), ignore_index=-1)
-        # pred_kps = pred.argmax(dim=1)
-        # import pdb; pdb.set_trace()
-        # kps_one_hot = convert_kp_to_one_hot(kps, pred.size(1))
-        # loss_pck, pred_kps = self.pck_criterion(pred, kps_one_hot.cuda())
-=======
-        loss_pck = F.cross_entropy(pred, kps.cuda(), ignore_index=-1)
->>>>>>> 2d892fd3ee8138070c2be31df4ea66887eb90b24
         loss["total"] = loss_pck
         return loss
 

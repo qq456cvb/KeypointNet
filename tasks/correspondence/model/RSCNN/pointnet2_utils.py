@@ -3,12 +3,12 @@ from torch.autograd import Variable
 from torch.autograd import Function
 import torch.nn.functional as F
 import torch.nn as nn
-from model.RSCNN.utils.linalg_utils import pdist2, PDist2Order
+from models.RSCNN.utils.linalg_utils import pdist2, PDist2Order
 from collections import namedtuple
-import model.RSCNN.pytorch_utils as pt_utils
+import models.RSCNN.pytorch_utils as pt_utils
 from typing import List, Tuple
 
-from model.RSCNN.utils._ext import pointnet2
+import rscnn_ops_ext as _ext
 
 
 class RandomDropout(nn.Module):
@@ -49,7 +49,7 @@ class FurthestPointSampling(Function):
 
         output = torch.cuda.IntTensor(B, npoint)
         temp = torch.cuda.FloatTensor(B, N).fill_(1e10)
-        pointnet2.furthest_point_sampling_wrapper(
+        _ext.furthest_point_sampling(
             B, N, npoint, xyz, temp, output
         )
         return output
@@ -86,7 +86,7 @@ class GatherOperation(Function):
 
         output = torch.cuda.FloatTensor(B, C, npoint)
 
-        pointnet2.gather_points_wrapper(
+        _ext.gather_points(
             B, C, N, npoint, features, idx, output
         )
 
@@ -101,7 +101,7 @@ class GatherOperation(Function):
 
         grad_features = Variable(torch.cuda.FloatTensor(B, C, N).zero_())
         grad_out_data = grad_out.data.contiguous()
-        pointnet2.gather_points_grad_wrapper(
+        _ext.gather_points_grad(
             B, C, N, npoint, grad_out_data, idx, grad_features.data
         )
 
@@ -139,7 +139,7 @@ class ThreeNN(Function):
         dist2 = torch.cuda.FloatTensor(B, N, 3)
         idx = torch.cuda.IntTensor(B, N, 3)
 
-        pointnet2.three_nn_wrapper(B, N, m, unknown, known, dist2, idx)
+        _ext.three_nn(B, N, m, unknown, known, dist2, idx)
 
         return torch.sqrt(dist2), idx
 
@@ -183,7 +183,7 @@ class ThreeInterpolate(Function):
 
         output = torch.cuda.FloatTensor(B, c, n)
 
-        pointnet2.three_interpolate_wrapper(
+        _ext.three_interpolate(
             B, c, m, n, features, idx, weight, output
         )
 
@@ -210,7 +210,7 @@ class ThreeInterpolate(Function):
         grad_features = Variable(torch.cuda.FloatTensor(B, c, m).zero_())
 
         grad_out_data = grad_out.data.contiguous()
-        pointnet2.three_interpolate_grad_wrapper(
+        _ext.three_interpolate_grad(
             B, c, n, m, grad_out_data, idx, weight, grad_features.data
         )
 
@@ -244,7 +244,7 @@ class GroupingOperation(Function):
 
         output = torch.cuda.FloatTensor(B, C, nfeatures, nsample)
 
-        pointnet2.group_points_wrapper(
+        _ext.group_points(
             B, C, N, nfeatures, nsample, features, idx, output
         )
 
@@ -271,7 +271,7 @@ class GroupingOperation(Function):
         grad_features = Variable(torch.cuda.FloatTensor(B, C, N).zero_())
 
         grad_out_data = grad_out.data.contiguous()
-        pointnet2.group_points_grad_wrapper(
+        _ext.group_points_grad(
             B, C, N, npoint, nsample, grad_out_data, idx, grad_features.data
         )
 
@@ -311,7 +311,7 @@ class BallQuery(Function):
         npoint = new_xyz.size(1)
         idx = torch.cuda.IntTensor(B, npoint, nsample).zero_()
 
-        pointnet2.ball_query_wrapper(
+        _ext.ball_query(
             B, N, npoint, radius, nsample, new_xyz, xyz, fps_idx, idx
         )
 

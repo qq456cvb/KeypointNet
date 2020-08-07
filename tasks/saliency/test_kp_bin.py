@@ -3,10 +3,12 @@ from train_kp_bin import NAMES2ID, KeypointDataset, BASEDIR
 import os
 from models.rsnet import RSNet
 from models.point_net import PointNetDenseCls
-from models.pointconv import PointConvDensityClsSsg
 from models.dgcnn import DGCNN
 from models.graphcnn import GraphConvNet
 from models.spidercnn import Spidercnn_seg_fullnet
+from models.pointconv import PointConvDensityClsSsg
+from models.RSCNN.rscnn import RSCNN_MSN
+from models.pointnet2.net import Pointnet2SSG
 # from models.RSCNN.rscnn import RSCNN_MSN
 import torch.nn.functional as F
 from evaluate_map import eval_map
@@ -54,12 +56,14 @@ def main(cfg):
 
     # Load different models
     if cfg.network == 'rsnet':
-        model = RSNet(test_dataset.nclasses).to(device)
+        model = RSNet(test_dataset.nclasses, rg=2.0).to(device)
     elif cfg.network == 'pointnet':
         model = PointNetDenseCls(test_dataset.nclasses).to(device)
+    elif cfg.network == 'pointnet2':
+        model = Pointnet2SSG(test_dataset.nclasses).to(device)
     elif cfg.network == 'dgcnn':
         model = DGCNN(test_dataset.nclasses).to(device)
-    elif cfg.network == 'graphconv':
+    elif cfg.network == 'graphcnn':
         model = GraphConvNet([3, 1024, 5, 1024, 5], [512, test_dataset.nclasses]).to(device)
     elif cfg.network == 'spidercnn':
         model = Spidercnn_seg_fullnet(test_dataset.nclasses).to(device)
@@ -72,7 +76,7 @@ def main(cfg):
         exit()
     
     state_dict_tmp = torch.load('pck_best.pth')
-    print(state_dict_tmp.keys())
+    # print(state_dict_tmp.keys())
     # state_dict = {}
     # for k, v in state_dict_tmp.items():
     #     state_dict[k.replace("backbone.","")] = v

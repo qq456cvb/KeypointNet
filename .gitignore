@@ -1,5 +1,7 @@
 .vscode
 __pycache__
+build
+CMakeFiles
 /splits/gen_splits.py
 /annotations/*
 !/annotations/chair.json

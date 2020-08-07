@@ -2,13 +2,13 @@ log_path: saliency_log
 
 class_name: chair
 rot_exp:
-  rot_train: True
-  rot_test: True  # rotation experiment
+  rot_train: False
+  rot_test: False  # rotation experiment
 
-network: rsnet
+network: pointnet
+max_epoch: 30
 rot_gravity: False
 data_aug: False
-
 iou_thresh: 0.1
 
 data:
@@ -16,9 +16,12 @@ data:
   annot_path: annotations/all.json
   model_root: models
   pcd_root: pcds
-  test_txt: splits/test.txt
+  train_txt: splits/train.txt
+  val_txt: splits/val.txt
 
 hydra:
   run:
-    dir: ${log_path}/${network}/${class_name}
-    # dir: ${log_path}/${network}_binlog_${class_name}_geo
+    dir: ${log_path}/${class_name}/${rot_exp}/${network}
+  sweep:
+    dir: ${log_path}
+    subdir: ${class_name}/${rot_exp}/${network}

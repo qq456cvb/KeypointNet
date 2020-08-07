@@ -6,7 +6,7 @@ sys.path.append(os.path.join(BASE_DIR, "../utils"))
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-import model.RSCNN.pytorch_utils as pt_utils
+import models.RSCNN.pytorch_utils as pt_utils
 from .pointnet2_modules import PointnetSAModule, PointnetFPModule, PointnetSAModuleMSG
 import numpy as np
 
@@ -134,6 +134,7 @@ class RSCNN_MSN(nn.Module):
                 Each point in the point-cloud MUST
                 be formated as (x, y, z, features...)
         """
+        
         pointcloud = pointcloud.transpose(1,2)
         xyz, features = self._break_up_pc(pointcloud)
         cls = torch.zeros(pointcloud.size(0), 16).cuda()

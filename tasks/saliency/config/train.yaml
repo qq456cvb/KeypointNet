@@ -2,11 +2,11 @@ log_path: saliency_log
 
 class_name: chair
 rot_exp:
-  rot_train: True
-  rot_test: True  # rotation experiment
+  rot_train: False
+  rot_test: False  # rotation experiment
 
-network: rsnet
-max_epoch: 100
+network: pointnet
+max_epoch: 30
 rot_gravity: False
 data_aug: False
 
@@ -20,5 +20,7 @@ data:
 
 hydra:
   run:
-    dir: ${log_path}/${network}/${class_name}
-    # dir: ${log_path}/${network}_binlog_${class_name}_geo
+    dir: ${log_path}/${class_name}/${rot_exp}/${network}
+  sweep:
+    dir: ${log_path}
+    subdir: ${class_name}/${rot_exp}/${network}

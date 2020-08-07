@@ -207,3 +207,9 @@ class RSNet(nn.Module):
                 else:
                     hidden_list.append(torch.zeros(2, bs, hid_sz).cuda())
         return hidden_list
+    
+if __name__ == "__main__":
+    x = torch.randn((4, 3, 2048)).cuda()
+    rsnet = RSNet(2).cuda()
+    print(rsnet(x).shape)
+    

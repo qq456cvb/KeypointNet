@@ -60,8 +60,15 @@ class Trainer:
             self.scheduler.zero_grad()
 
             logits = self.model(batch_data)
-            pcds, kp_index = batch_data
-            loss = self.criterion((logits, kp_index))['total']
+            pcds, kp_indexs, _ = batch_data
+            
+            loss = []
+            for b, kp_index in enumerate(kp_indexs):
+                loss_rot = []
+                for rot_kp_index in kp_index:
+                    loss_rot.append(self.criterion((logits[b][None], rot_kp_index[None]))['total'])
+                loss.append(torch.min(torch.stack(loss_rot)))
+            loss = torch.mean(torch.stack(loss))
 
             loss.backward()
             loss_avg += loss.item()
@@ -75,9 +82,6 @@ class Trainer:
 
     def evaluate(self):
         self.model.eval()
-        for k in self.loss_dict.keys():
-            self.loss_dict[k] = 0.
-
         val_data = self.trainer_config['val_data']
         metric = self.trainer_config['metric']
         self.logger.info("-------------------Evaluating model----------------------")
@@ -86,15 +90,28 @@ class Trainer:
         loss_avg = 0
         results_list = []
         for batch_data in tqdm(val_data):
+            # import pdb; pdb.set_trace()
             with torch.no_grad():
                 logits = self.model(batch_data)
             pred_index = torch.argmax(logits, dim=1)
-            pcds, kp_index = batch_data
-            input = (pcds.cuda(), kp_index.cuda(), pred_index)
+            pcds, kp_indexs, _ = batch_data
+            
+            loss = []
+            best_kp_indexes = []
+            # import pdb; pdb.set_trace()
+            for b, kp_index in enumerate(kp_indexs):
+                loss_rot = []
+                for rot_kp_index in kp_index:
+                    loss_rot.append(self.criterion((logits[b][None], rot_kp_index[None]))['total'])
+                loss.append(torch.min(torch.stack(loss_rot)))
+                best_kp_indexes.append(kp_index[torch.argmin(torch.stack(loss_rot))])
+            loss = torch.mean(torch.stack(loss))
+            
+            
+            input = (pcds.cuda(), torch.stack(best_kp_indexes).cuda(), pred_index)
             corr_list = metric(input)
             results_list.append(corr_list)
 
-            loss = self.criterion((logits, kp_index))['total']
             loss_avg += loss.item()
             cnt += 1
 
@@ -117,4 +134,3 @@ class Trainer:
             torch.save(self.model.state_dict(), 'pck_best.pth')
 
         self.logger.info("Validation loss: {}".format(loss_avg))
-

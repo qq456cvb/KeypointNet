@@ -23,7 +23,8 @@ from models.dgcnn import DGCNN
 from models.graphcnn import GraphConvNet
 from models.spidercnn import Spidercnn_seg_fullnet
 from models.pointconv import PointConvDensityClsSsg
-# from models.RSCNN.rscnn import RSCNN_MSN
+from models.RSCNN.rscnn import RSCNN_MSN
+from models.pointnet2.net import Pointnet2SSG
 from scipy.stats import special_ortho_group
 
 ID2NAMES = {"02691156": "airplane",
@@ -100,11 +101,16 @@ def add_noise(x, sigma=0.015, clip=0.05):
     return x + noise
 
 
+def normalize_pc(pc):
+    pc = pc - pc.mean(0)
+    pc /= np.max(np.linalg.norm(pc, axis=-1))
+    return pc
+
+
 class KeypointDataset(torch.utils.data.Dataset):
     def __init__(self, cfg, split):
         super().__init__()
         self.aug = cfg.data_aug
-        # self.rot_gravity = cfg.rot_gravity
         self.catg = cfg.class_name
         self.rot_train = cfg.rot_exp.rot_train
         self.rot_test = cfg.rot_exp.rot_test
@@ -113,15 +119,24 @@ class KeypointDataset(torch.utils.data.Dataset):
         elif split == 'val' or split == 'test':
             self.rot_exp = self.rot_test
         
-        if split== 'val':
-            split = 'validate'
-        filename = os.path.join(BASEDIR,
-            cfg.data.data_path, '{}_{}.h5'.format(self.catg, split))
-        with h5py.File(filename, 'r') as f:
-            self.pcds = f['point_clouds'][:]
-            self.keypoints = f['keypoints'][:]
-            self.mesh_names = f['mesh_names'][:]
+        annots = json.load(open(os.path.join(BASEDIR, cfg.data.annot_path)))
+        annots = [annot for annot in annots if annot['class_id'] == NAMES2ID[cfg.class_name]]
+        keypoints = dict([(annot['model_id'], [kp_info['pcd_info']['point_index'] for kp_info in annot['keypoints']]) for annot in annots])
         
+        split_models = open(os.path.join(BASEDIR, "splits/{}.txt".format(split))).readlines()
+        split_models = [m.split('-')[-1].rstrip('\n') for m in split_models]
+        
+        self.pcds = []
+        self.keypoints = []
+        self.mesh_names = []
+        for fn in glob(os.path.join(BASEDIR, cfg.data.pcd_root, NAMES2ID[cfg.class_name], '*.pcd')):
+            model_id = os.path.basename(fn).split('.')[0]
+            if model_id not in split_models:
+                continue
+            self.keypoints.append(keypoints[model_id])
+            self.pcds.append(naive_read_pcd(fn)[0])
+            self.mesh_names.append(model_id)
+
         self.nclasses = 2
 
     def __getitem__(self, idx):
@@ -129,6 +144,9 @@ class KeypointDataset(torch.utils.data.Dataset):
         label = self.keypoints[idx]
         bin_label = np.zeros((pc.shape[0],), dtype=np.int64)
         bin_label[label] = 1
+        
+        pc = normalize_pc(pc)
+        
         if self.aug:
             pc = add_noise(pc, sigma=0.004, clip=0.01)
 
@@ -159,19 +177,21 @@ def train(cfg):
     log_dir = os.path.curdir
 
     train_dataset = KeypointDataset(cfg, 'train')
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=4)
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=4, drop_last=True)
 
     val_dataset = KeypointDataset(cfg, 'val')
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=4, num_workers=4)
 
     # Load different models
     if cfg.network == 'rsnet':
-        model = RSNet(train_dataset.nclasses).to(device)
+        model = RSNet(train_dataset.nclasses, rg=2.0).to(device)
     elif cfg.network == 'pointnet':
         model = PointNetDenseCls(train_dataset.nclasses).to(device)
+    elif cfg.network == 'pointnet2':
+        model = Pointnet2SSG(train_dataset.nclasses).to(device)
     elif cfg.network == 'dgcnn':
         model = DGCNN(train_dataset.nclasses).to(device)
-    elif cfg.network == 'graphconv':
+    elif cfg.network == 'graphcnn':
         model = GraphConvNet([3, 1024, 5, 1024, 5], [512, train_dataset.nclasses]).to(device)
     elif cfg.network == 'spidercnn':
         model = Spidercnn_seg_fullnet(train_dataset.nclasses).to(device)

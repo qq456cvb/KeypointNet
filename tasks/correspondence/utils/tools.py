@@ -166,7 +166,7 @@ def convert_kp_to_binary(kps, num_point):
                 vector[i, k] = 1
     return vector
 
-def pck(P, KP, pred_KP):
+def pck(P, KP, pred_KP, geo_dists):
     n_data = P.shape[0]
     n_points = P.shape[1]
     n_labels = KP.shape[1]
@@ -189,7 +189,10 @@ def pck(P, KP, pred_KP):
             idx_j = pred_KP[k, label]
             p_j = P[k, idx_j]
 
-            all_dists = np.linalg.norm(p_i - p_j)
+            if geo_dists is None:
+                all_dists = np.linalg.norm(p_i - p_j)
+            else:
+                all_dists = geo_dists[k][idx_i, idx_j]
             dists_info.append((k, i, i, all_dists))
 
     dists_info = np.array(dists_info)

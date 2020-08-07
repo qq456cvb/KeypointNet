@@ -17,6 +17,7 @@ class Evaluator:
         self.criterion = self.trainer_config['criterion']
         self.test_data = self.trainer_config['test_data']
         self.metric = self.trainer_config['metric']
+        self.geo_dists = self.trainer_config['geo_dists']
         
         self.max_epoch = cfg.max_epoch
         self.cfg = cfg
@@ -42,12 +43,24 @@ class Evaluator:
             with torch.no_grad():
                 logits = self.model(batch_data)
             pred_index = torch.argmax(logits, dim=1)
-            pcds, kp_index = batch_data
-            input = (pcds.cuda(), kp_index.cuda(), pred_index)
+            pcds, kp_indexs, mesh_names = batch_data
+            
+            loss = []
+            best_kp_indexes = []
+            # import pdb; pdb.set_trace()
+            for b, kp_index in enumerate(kp_indexs):
+                loss_rot = []
+                for rot_kp_index in kp_index:
+                    loss_rot.append(self.criterion((logits[b][None], rot_kp_index[None]))['total'])
+                loss.append(torch.min(torch.stack(loss_rot)))
+                best_kp_indexes.append(kp_index[torch.argmin(torch.stack(loss_rot))])
+            loss = torch.mean(torch.stack(loss))
+            
+            geo_dists = [self.geo_dists[mesh_name] for mesh_name in mesh_names]
+            input = (pcds.cuda(), torch.stack(best_kp_indexes).cuda(), pred_index, geo_dists)
             corr_list = self.metric(input)
             results_list.append(corr_list)
-
-            loss = self.criterion((logits, kp_index))['total']
+            
             loss_avg += loss.item()
             cnt += 1
 

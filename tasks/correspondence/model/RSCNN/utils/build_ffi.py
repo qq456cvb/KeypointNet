@@ -1,8 +1,8 @@
 import glob
 import torch
 import os.path as osp
-from torch.utils.ffi import create_extension
-#from torch.utils.cpp_extension import CppExtension
+# from torch.utils.ffi import create_extension
+from torch.utils.cpp_extension import CppExtension
 import sys, argparse, shutil
 
 base_dir = osp.dirname(osp.abspath(__file__))
@@ -28,8 +28,8 @@ def build(args):
     extra_objects = args.objs
     extra_objects += [a for a in glob.glob('/usr/local/cuda/lib64/*.a')]
 
-    ffi = create_extension(
-    #ffi = CppExtension(  
+    # ffi = create_extension(
+    ffi = CppExtension(  
 	'_ext.pointnet2',
         headers=[a for a in glob.glob("cinclude/*_wrapper.h")],
         sources=[a for a in glob.glob("csrc/*.c")],

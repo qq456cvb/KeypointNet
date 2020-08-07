@@ -81,7 +81,9 @@ class STNkd(nn.Module):
 class DGCNN(nn.Module):
     def __init__(self, output_channels=10, cfg=None):
         super(DGCNN, self).__init__()
-        cfg["emb_dims"] = 128
+        cfg = {"emb_dims": 128,
+               "drop_prob1": 0.1,
+               "drop_prob2": 0.45}
         self.cfg = cfg
         self.k = 20
         # self.stn = STNkd(3);
