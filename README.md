@@ -7,7 +7,7 @@
 For updated dataset information, see [Change Log](CHANGELOG.md)
 
 # Keypoint Data
-Dataset can be downloaded from [google drive](https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing "https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing") or [here](http://youyangsoft.com/public/KeypointNet/ShapeNetCore.v2.zip). Annotated JSON data is placed under **annotations**. In addition, we provide sampled point clouds (2048 points) for each ShapeNet model under **pcds**.
+Dataset can be downloaded from <a href="https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing" target="_blank">google drive</a> or <a href="http://youyangsoft.com/public/KeypointNet/ShapeNetCore.v2.zip" target="_blank">here</a>. Annotated JSON data is placed under **annotations**. In addition, we provide sampled point clouds (2048 points) for each ShapeNet model under **pcds**.
 
 We have processed and cleaned labels for airplane (1022 models), bathtub (492 models), bed (146 models), bottle (380 models), cap (38 models), car (1002 models), chair (999 models), guitar (697 models), helmet (90 models), knife (270 models), laptop (439 models), motorcycle (298 models), mug (198 models), skateboard (141 models), table (1124 models) and vessel (910 models).
 
