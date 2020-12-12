@@ -1,0 +1,38 @@
+optimizer:
+  lr: 1e-3
+  lr_decay: 0.5
+  lr_step: 10
+  weight_decay: 1e-4
+
+task: saliency
+batch_size: 8
+max_epoch: 50
+num_workers: 6
+class_name: chair
+num_points: 2048
+iou_thresh: 0.1
+
+augmentation:
+  gaussian_noise: True
+  translation: True
+  rot_gravity: False
+
+normalize_pc: False
+
+data:
+  annot_path: annotations/all.json
+  model_root: models
+  pcd_root: pcds
+  train_txt: splits/train.txt
+  val_txt: splits/val.txt
+  test_txt: splits/test.txt
+
+defaults:
+  - network: pointnet
+
+hydra:
+  run:
+    dir: ${task}_log/${class_name}/${network.name}
+  sweep:
+    dir: ${task}_log
+    subdir: ${class_name}/${network.name}

@@ -1,0 +1,5 @@
+# @package _group_
+name: rscnn
+input_channels: 0
+relation_prior: 1
+use_xyz: True

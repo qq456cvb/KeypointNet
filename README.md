@@ -72,7 +72,7 @@ We have processed and cleaned labels for airplane (1022 models), bathtub (492 mo
 Example scripts on reading and visualizing keypoints on both point clouds and triangle meshes are placed under **examples**.
 
 # Keypoint Detection Tasks
-Keypoint saliency and correspondence training and evaluation baselines for various backbones are placed under **tasks**. For more details, please refer to **tasks/README.md**.
+Keypoint saliency and correspondence training and evaluation baselines for various backbones are placed under **benchmark_scripts**. For more details, please refer to **benchmark_scripts/README.md**.
 
 # Data Splits
 train/val/test splits are placed under **splits**. Each line is formatted as `[class_id]-[model_id]`.

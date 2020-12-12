@@ -1,0 +1,5 @@
+# @package _group_
+name: dgcnn
+emb_dims: 128
+drop_prob1: 0.1
+drop_prob2: 0.45

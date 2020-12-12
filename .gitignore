@@ -2,6 +2,8 @@
 __pycache__
 build
 CMakeFiles
+*_log
+cache
 /splits/gen_splits.py
 /annotations/*
 !/annotations/chair.json
@@ -10,4 +12,5 @@ CMakeFiles
 /pcds
 !/pcds/03001627/88382b877be91b2a572f8e1c1caad99e.pcd
 **/build
-/cache
+dist
+*.egg-info

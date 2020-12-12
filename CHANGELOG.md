@@ -1,5 +1,8 @@
 # Change Log
 
+## 2020-12-12
+- Done code cleanup. Now it's much easier to run and read benchmark code.
+
 ## 2020-06-15
 - **Full dataset is available now!** Note: some of knives are misaligned (where x-axis is flipped) in the orginal ShapeNet. We picked those misaligned ones and stored them into **knife_misaligned.txt**.
 

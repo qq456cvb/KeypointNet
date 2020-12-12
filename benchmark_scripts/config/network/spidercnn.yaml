@@ -1,0 +1,5 @@
+# @package _group_
+name: spidercnn
+K_knn: 16
+taylor_channel: 3
+withnor: False

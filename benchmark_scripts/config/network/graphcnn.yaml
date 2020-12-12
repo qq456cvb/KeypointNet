@@ -1,0 +1,4 @@
+# @package _group_
+name: graphcnn
+net_parameters: 3, 1024, 5, 1024, 5
+mlp: 512
