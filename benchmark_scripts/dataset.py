@@ -58,7 +58,6 @@ def normalize_pc(pc):
 class KeypointSaliencyDataset(torch.utils.data.Dataset):
     def __init__(self, cfg, split):
         super().__init__()
-        self.aug = cfg.data_aug
         self.catg = cfg.class_name
         self.cfg = cfg
         
@@ -81,7 +80,7 @@ class KeypointSaliencyDataset(torch.utils.data.Dataset):
             self.mesh_names.append(model_id)
 
         self.nclasses = 2
-
+        self.split = split
     
     def __getitem__(self, idx):
         pc = self.pcds[idx]
@@ -93,21 +92,23 @@ class KeypointSaliencyDataset(torch.utils.data.Dataset):
         if self.cfg.normalize_pc:
             pc = normalize_pc(pc)
         
-        if self.cfg.augmentation.gaussian_noise:
-            pc = add_noise(pc, sigma=0.004, clip=0.01)
+        if self.split == 'train':
+            if self.cfg.augmentation.gaussian_noise:
+                pc = add_noise(pc, sigma=0.004, clip=0.01)
 
-        if self.cfg.augmentation.translation:
-            tr = np.random.rand() * 0.02
-            rot = special_ortho_group.rvs(3)
-            pc = pc @ rot
-            pc += np.array([[tr, 0, 0]])
-            pc = pc @ rot.T
+            if self.cfg.augmentation.translation:
+                tr = np.random.rand() * 0.02
+                rot = special_ortho_group.rvs(3)
+                pc = pc @ rot
+                pc += np.array([[tr, 0, 0]])
+                pc = pc @ rot.T
 
-        # allow rotation along gravity axis
-        if self.cfg.augmentation.rot_gravity:
-            angle = np.random.rand() * 2 * np.pi
-            rot = np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
-            pc = (rot @ pc.T).T
+            # allow rotation along gravity axis
+            if self.cfg.augmentation.rot_gravity:
+                angle = np.random.rand() * 2 * np.pi
+                rot = np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
+                pc = (rot @ pc.T).T
+                
         return pc.astype(np.float32), bin_label, mesh_name
 
     def __len__(self):
@@ -117,7 +118,6 @@ class KeypointSaliencyDataset(torch.utils.data.Dataset):
 class KeypointCorrespondenceDataset(torch.utils.data.Dataset):
     def __init__(self, cfg, split):
         super().__init__()
-        self.aug = cfg.data_aug
         self.catg = cfg.class_name
         self.cfg = cfg
             
@@ -127,6 +127,7 @@ class KeypointCorrespondenceDataset(torch.utils.data.Dataset):
         rotation_groups = dict([(annot['model_id'], annot['symmetries']['rotation']) for annot in annots])
         
         self.nclasses = max([max([kp_info['semantic_id'] for kp_info in annot['keypoints']]) for annot in annots]) + 1
+        self.split = split
         
         split_models = open(os.path.join(BASEDIR, "splits/{}.txt".format(split))).readlines()
         split_models = [m.split('-')[-1].rstrip('\n') for m in split_models]
@@ -183,22 +184,23 @@ class KeypointCorrespondenceDataset(torch.utils.data.Dataset):
                 label_rotated[label >= 0] = pairwise_distances_argmin(keypoints_rotated, pc)
                 
                 labels.append(label_rotated)
-            
-        if self.cfg.augmentation.gaussian_noise:
-            pc = add_noise(pc, sigma=0.004, clip=0.01)
+        
+        if self.split == 'train':
+            if self.cfg.augmentation.gaussian_noise:
+                pc = add_noise(pc, sigma=0.004, clip=0.01)
 
-        if self.cfg.augmentation.translation:
-            tr = np.random.rand() * 0.02
-            rot = special_ortho_group.rvs(3)
-            pc = pc @ rot
-            pc += np.array([[tr, 0, 0]])
-            pc = pc @ rot.T
+            if self.cfg.augmentation.translation:
+                tr = np.random.rand() * 0.02
+                rot = special_ortho_group.rvs(3)
+                pc = pc @ rot
+                pc += np.array([[tr, 0, 0]])
+                pc = pc @ rot.T
 
-        # allow rotation along gravity axis
-        if self.cfg.augmentation.rot_gravity:
-            angle = np.random.rand() * 2 * np.pi
-            rot = np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
-            pc = (rot @ pc.T).T
+            # allow rotation along gravity axis
+            if self.cfg.augmentation.rot_gravity:
+                angle = np.random.rand() * 2 * np.pi
+                rot = np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
+                pc = (rot @ pc.T).T
             
         return pc.astype(np.float32), labels, mesh_name
 
