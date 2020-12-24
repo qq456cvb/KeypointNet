@@ -79,7 +79,7 @@ train/val/test splits are placed under **splits**. Each line is formatted as `[c
 
 
 # Citation
-If you use the KeypointNet data or code, please cite:
+If you find KeypointNet data or code useful in your research, please consider citing:
 ```
 @article{you2020keypointnet,
   title={KeypointNet: A Large-scale 3D Keypoint Dataset Aggregated from Numerous Human Annotations},
