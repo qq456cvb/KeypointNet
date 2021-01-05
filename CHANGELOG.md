@@ -1,5 +1,7 @@
 # Change Log
 
+## 2021-01-05
+- Fixed problematic annotations for three chairs. Removed reflection planes of legs in swivel chairs.
 ## 2020-12-12
 - Done code cleanup. Now it's much easier to run and read benchmark code.
 
