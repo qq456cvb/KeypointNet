@@ -3,6 +3,8 @@
 **Full dataset is available now!** KeypointNet is a large-scale and diverse 3D keypoint dataset that contains
 83,231 keypoints and 8,329 3D models from 16 object categories, by leveraging numerous human annotations, based on ShapeNet models. Our paper is available on https://arxiv.org/pdf/2002.12687.pdf and is accepted to CVPR 2020. **You can explore our dataset on <a href="http://qq456cvb.github.io/keypointnet/explore/" target="_blank">http://qq456cvb.github.io/keypointnet/explore/</a>**.
 
+**News! Two interesting unsupervised keypoint detectors: [UKPGAN](https://github.com/qq456cvb/UKPGAN) (unordered but SE(3) invariant) and [SkeletonMerger](https://github.com/eliphatfs/SkeletonMerger) (not SE(3) invariant but ordered) are now released!**
+
 # Change Logs
 For updated dataset information, see [Change Log](CHANGELOG.md)
 
