@@ -202,7 +202,7 @@ class KeypointCorrespondenceDataset(torch.utils.data.Dataset):
                 rot = np.array([[np.cos(angle), 0, -np.sin(angle)], [0, 1, 0], [np.sin(angle), 0, np.cos(angle)]])
                 pc = (rot @ pc.T).T
             
-        return pc.astype(np.float32), labels, mesh_name
+        return pc.astype(np.float32), np.stack(labels), mesh_name
 
     def __len__(self):
         return len(self.pcds)
