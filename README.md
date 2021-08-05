@@ -96,3 +96,6 @@ If you find KeypointNet data or code useful in your research, please consider ci
 - [x] clean labels for more classes
 - [x] add colored pcds/meshes
 - [x] a browser interface to explore dataset
+
+# License
+Our KeypointNet is released under MIT license.
