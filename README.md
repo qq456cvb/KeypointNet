@@ -113,10 +113,11 @@ See [CHANGELOG.md](CHANGELOG.md) for dataset updates (label fixes, semantic-id c
 If you find KeypointNet data or code useful in your research, please consider citing:
 
 ```bibtex
-@article{you2020keypointnet,
-  title={KeypointNet: A Large-scale 3D Keypoint Dataset Aggregated from Numerous Human Annotations},
+@inproceedings{you2020keypointnet,
+  title={KeypointNet: A Large-Scale 3D Keypoint Dataset Aggregated From Numerous Human Annotations},
   author={You, Yang and Lou, Yujing and Li, Chengkun and Cheng, Zhoujun and Li, Liangwei and Ma, Lizhuang and Lu, Cewu and Wang, Weiming},
-  journal={arXiv preprint arXiv:2002.12687},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages={13647--13656},
   year={2020}
 }
 ```
