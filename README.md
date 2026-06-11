@@ -5,6 +5,16 @@
 
 **News! Two interesting unsupervised keypoint detectors: [UKPGAN](https://github.com/qq456cvb/UKPGAN) (unordered but SE(3) invariant) and [SkeletonMerger](https://github.com/eliphatfs/SkeletonMerger) (not SE(3) invariant but ordered) are now released!**
 
+<!-- README refined by Cursor -->
+
+## Data and Artifact Mirrors
+
+No verified Hugging Face mirror is available yet for the artifacts below; use the original sources until a complete mirror is uploaded.
+
+Original, external, or pending sources:
+- Keypoint annotations and sampled point clouds: [https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing](https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing). Hugging Face mirror is pending because the large Drive download did not complete reliably.
+- OneDrive mirror: [https://1drv.ms/u/s!Aj0NuSsDz6hDyF3LT3xaPkXK9DXC?e=kcrfSg](https://1drv.ms/u/s!Aj0NuSsDz6hDyF3LT3xaPkXK9DXC?e=kcrfSg). secondary mirror; Google Drive source is authoritative for migration
+
 # Change Logs
 For updated dataset information, see [Change Log](CHANGELOG.md)
 
