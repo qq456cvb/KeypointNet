@@ -8,7 +8,12 @@ KeypointNet is a large-scale and diverse 3D keypoint dataset that contains **83,
 
 ## Download
 
-The full dataset is available on [Google Drive](https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing) or [OneDrive](https://1drv.ms/u/s!Aj0NuSsDz6hDyF3LT3xaPkXK9DXC?e=kcrfSg). It contains:
+The full dataset is available on [Hugging Face](https://huggingface.co/datasets/qq456cvb/KeypointNet), [Google Drive](https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing) or [OneDrive](https://1drv.ms/u/s!Aj0NuSsDz6hDyF3LT3xaPkXK9DXC?e=kcrfSg). It contains:
+
+```bash
+# download with the Hugging Face CLI
+hf download qq456cvb/KeypointNet --repo-type dataset --local-dir keypointnet_data
+```
 
 - **`annotations/`** — keypoint annotations as one JSON file per category (format below).
 - **`pcds/`** — sampled colored point clouds (2,048 points) for each ShapeNet model.
