@@ -11,13 +11,16 @@ KeypointNet is a large-scale and diverse 3D keypoint dataset that contains **83,
 The full dataset is available on [Hugging Face](https://huggingface.co/datasets/qq456cvb/KeypointNet), [Google Drive](https://drive.google.com/drive/folders/1_d1TzZEF25Wy5kRj5ZugrgGeyf7xxu8F?usp=sharing) or [OneDrive](https://1drv.ms/u/s!Aj0NuSsDz6hDyF3LT3xaPkXK9DXC?e=kcrfSg). It contains:
 
 ```bash
-# download with the Hugging Face CLI
+# download the whole dataset with the Hugging Face CLI
 hf download qq456cvb/KeypointNet --repo-type dataset --local-dir keypointnet_data
+
+# or grab just a subset, e.g. only the point clouds for one category
+hf download qq456cvb/KeypointNet --repo-type dataset --include "pcds/03001627/*" --local-dir keypointnet_data
 ```
 
 - **`annotations/`** — keypoint annotations as one JSON file per category (format below).
-- **`pcds/`** — sampled colored point clouds (2,048 points) for each ShapeNet model.
-- **`ShapeNetCore.v2.ply.zip`** — colored triangle meshes (`.ply` with diffuse-texture vertex colors). Processing raw ShapeNet `.obj` files as colored meshes is painful, so we provide these ready to use; color is a valuable signal when learning from 3D geometry.
+- **`pcds/`** — sampled colored point clouds (2,048 points) for each ShapeNet model, stored as one ascii `.pcd` file per model at `pcds/<class_id>/<model_id>.pcd`.
+- **`ShapeNetCore.v2.ply/`** — colored triangle meshes, one `.ply` file per model at `ShapeNetCore.v2.ply/<class_id>/<model_id>.ply` (with diffuse-texture vertex colors). Processing raw ShapeNet `.obj` files as colored meshes is painful, so we provide these ready to use; color is a valuable signal when learning from 3D geometry.
 - **`knife_misaligned.txt`** — a list of knives that are misaligned (x-axis flipped) in the original ShapeNet.
 
 Labels are processed and cleaned for: airplane (1022 models), bathtub (492), bed (146), bottle (380), cap (38), car (1002), chair (999), guitar (697), helmet (90), knife (270), laptop (439), motorcycle (298), mug (198), skateboard (141), table (1124) and vessel (910).
