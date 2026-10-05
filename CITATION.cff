@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+message: "If you use this code or data in your research, please cite the paper below."
+title: "KeypointNet: A Large-Scale 3D Keypoint Dataset Aggregated From Numerous Human Annotations"
+authors:
+  - family-names: "You"
+    given-names: "Yang"
+    orcid: "https://orcid.org/0000-0003-0125-0792"
+  - family-names: "Lou"
+    given-names: "Yujing"
+  - family-names: "Li"
+    given-names: "Chengkun"
+  - family-names: "Cheng"
+    given-names: "Zhoujun"
+  - family-names: "Li"
+    given-names: "Liangwei"
+  - family-names: "Ma"
+    given-names: "Lizhuang"
+  - family-names: "Lu"
+    given-names: "Cewu"
+  - family-names: "Wang"
+    given-names: "Weiming"
+repository-code: "https://github.com/qq456cvb/KeypointNet"
+url: "https://qq456cvb.github.io/keypointnet/"
+preferred-citation:
+  type: conference-paper
+  title: "KeypointNet: A Large-Scale 3D Keypoint Dataset Aggregated From Numerous Human Annotations"
+  authors:
+    - family-names: "You"
+      given-names: "Yang"
+      orcid: "https://orcid.org/0000-0003-0125-0792"
+    - family-names: "Lou"
+      given-names: "Yujing"
+    - family-names: "Li"
+      given-names: "Chengkun"
+    - family-names: "Cheng"
+      given-names: "Zhoujun"
+    - family-names: "Li"
+      given-names: "Liangwei"
+    - family-names: "Ma"
+      given-names: "Lizhuang"
+    - family-names: "Lu"
+      given-names: "Cewu"
+    - family-names: "Wang"
+      given-names: "Weiming"
+  collection-title: "Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)"
+  conference:
+    name: "CVPR 2020"
+  year: 2020
+  start: 13647
+  end: 13656
+  url: "https://arxiv.org/abs/2002.12687"
+  identifiers:
+    - type: other
+      value: "arXiv:2002.12687"
+      description: "arXiv preprint"
