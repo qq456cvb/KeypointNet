@@ -1,8 +1,8 @@
 # KeypointNet: A Large-Scale 3D Keypoint Dataset (CVPR 2020)
 
-KeypointNet is a large-scale and diverse 3D keypoint dataset that contains **83,231 keypoints** and **8,329 3D models** from **16 object categories**, aggregated from numerous human annotations on ShapeNet models.
+KeypointNet is a large-scale and diverse 3D keypoint dataset that contains **8,234 3D models** and **103K+ keypoints** (103,447 in the release) from **16 object categories**, aggregated from numerous human annotations on ShapeNet models.
 
-[Paper (arXiv)](https://arxiv.org/pdf/2002.12687.pdf) | [Dataset Explorer](http://qq456cvb.github.io/keypointnet/explore/) — browse the annotated keypoints interactively in your browser.
+[Paper (arXiv)](https://arxiv.org/pdf/2002.12687.pdf) | [Project Page](https://qq456cvb.github.io/projects/keypointnet) | [Dataset Explorer](https://qq456cvb.github.io/projects/keypointnet#explore) — browse the annotated keypoints interactively in your browser.
 
 <img src="examples/captures/pcd.png" width="220" height="360" /><img src="examples/captures/obj.png" width="220" height="360" /><img src="examples/captures/ply.png" width="220" height="360" />
 
@@ -23,7 +23,7 @@ hf download qq456cvb/KeypointNet --repo-type dataset --include "pcds/03001627/*"
 - **`ShapeNetCore.v2.ply/`** — colored triangle meshes, one `.ply` file per model at `ShapeNetCore.v2.ply/<class_id>/<model_id>.ply` (with diffuse-texture vertex colors). Processing raw ShapeNet `.obj` files as colored meshes is painful, so we provide these ready to use; color is a valuable signal when learning from 3D geometry.
 - **`knife_misaligned.txt`** — a list of knives that are misaligned (x-axis flipped) in the original ShapeNet.
 
-Labels are processed and cleaned for: airplane (1022 models), bathtub (492), bed (146), bottle (380), cap (38), car (1002), chair (999), guitar (697), helmet (90), knife (270), laptop (439), motorcycle (298), mug (198), skateboard (141), table (1124) and vessel (910).
+Labels are processed and cleaned for: airplane (1022 models), bathtub (492), bed (146), bottle (380), cap (38), car (1002), chair (999), guitar (697), helmet (90), knife (270), laptop (439), motorcycle (298), mug (186), skateboard (141), table (1124) and vessel (910).
 
 This repository ships one chair (`pcds/`, `models/`, `annotations/chair.json`) as a self-contained sample so the example script runs out of the box.
 

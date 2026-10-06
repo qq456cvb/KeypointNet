@@ -20,7 +20,7 @@ authors:
   - family-names: "Wang"
     given-names: "Weiming"
 repository-code: "https://github.com/qq456cvb/KeypointNet"
-url: "https://qq456cvb.github.io/keypointnet/"
+url: "https://qq456cvb.github.io/projects/keypointnet"
 preferred-citation:
   type: conference-paper
   title: "KeypointNet: A Large-Scale 3D Keypoint Dataset Aggregated From Numerous Human Annotations"
